@@ -4,7 +4,7 @@ import { ChangeEvent, useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 import { BackGroundGradient } from "../src/components/BackgroundGradient";
 import { allocateGoo, Gobbler } from "../src/lib/goo-allocator";
-import { isNumber, toNumber } from "lodash";
+import { fill, isNumber, toNumber } from "lodash";
 
 const TextInput = ({
   value,
@@ -44,14 +44,16 @@ const Home: NextPage = () => {
   }, []);
 
   const setMultiple = useCallback(
-    (gobblerId: string) => (multiple: number) => {
-      const index = gobblers.findIndex((gobbler) => gobbler.id !== gobblerId);
-      setGobblers((old) =>
-        old.splice(index, 1, {
-          id: gobblerId,
-          multiple,
-        })
-      );
+    (gobblerId: string) => (rawMultiple: string) => {
+      const multiple = rawMultiple && toNumber(rawMultiple);
+      const index = gobblers.findIndex((gobbler) => gobbler.id === gobblerId);
+
+      const newArr = [...gobblers];
+      (newArr[index] = {
+        id: gobblerId,
+        multiple,
+      }),
+        setGobblers(newArr);
     },
     [gobblers]
   );
@@ -101,10 +103,7 @@ const Home: NextPage = () => {
                   <FieldSet key={index}>
                     <Title>Gobler #{index + 1}</Title>
                     <Field>
-                      <TextInput
-                        value={multiple}
-                        onChange={(input) => setGoo(toNumber(input))}
-                      />
+                      <TextInput value={multiple} onChange={setMultiple(id)} />
                       <FieldLabel>Multiple</FieldLabel>
                     </Field>
                     <Field>
@@ -165,6 +164,7 @@ const ToolSection = styled.div`
 const ToolContainer = styled.div`
   background: #fff;
   max-width: 900px;
+  width: 700px;
   min-width: 600px;
   margin: 0 auto;
   margin-top: 100px;
