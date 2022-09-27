@@ -12,6 +12,7 @@ Input the amount of goo you hold along with your gobblers and their multipliers.
 First, run the development server:
 
 ```bash
+yarn
 yarn dev
 ```
 
