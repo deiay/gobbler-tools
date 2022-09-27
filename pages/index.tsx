@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { BackGroundGradient } from "../src/components/BackgroundGradient";
 import { allocateGoo, Gobbler } from "../src/lib/goo-allocator";
 import { isNumber, toNumber } from "lodash";
+import { RemoveCircle } from "@styled-icons/ionicons-solid";
 
 const TextInput = ({
   value,
@@ -31,7 +32,13 @@ const Home: NextPage = () => {
     },
   ]);
 
-  const [goo, setGoo] = useState(4);
+  const [goo, setGoo] = useState<number | "">(4);
+
+  const updateGoo = (input: string) => {
+    if (input == "") return setGoo(input);
+
+    if (!isNaN(toNumber(input))) return setGoo(toNumber(input));
+  };
 
   const addGobbler = useCallback(() => {
     setGobblers((old) => [
@@ -45,8 +52,10 @@ const Home: NextPage = () => {
 
   const setMultiple = useCallback(
     (gobblerId: string) => (rawMultiple: string) => {
-      const multiple = rawMultiple && toNumber(rawMultiple);
       const index = gobblers.findIndex((gobbler) => gobbler.id === gobblerId);
+      const multiple = isNaN(toNumber(rawMultiple))
+        ? gobblers[index].multiple
+        : rawMultiple && toNumber(rawMultiple);
 
       const newArr = [...gobblers];
       (newArr[index] = {
@@ -68,7 +77,7 @@ const Home: NextPage = () => {
   );
 
   const { allocations, totalProductionRate } = useMemo(() => {
-    if (!isValid)
+    if (!isValid || typeof goo !== "number")
       return { allocations: undefined, totalProductionRate: undefined };
     return allocateGoo(gobblers, goo);
   }, [gobblers, goo, isValid]);
@@ -90,37 +99,48 @@ const Home: NextPage = () => {
               <FieldSet>
                 <Title>Goo</Title>
                 <Field>
-                  <TextInput
-                    value={goo}
-                    onChange={(input) => setGoo(toNumber(input))}
-                  />
+                  <TextInput value={goo} onChange={updateGoo} />
                 </Field>
                 <Field>
                   <Value>Total Production Rate</Value>
-                  {totalProductionRate}
+                  {totalProductionRate?.toFixed(7) || "-"}
                 </Field>
               </FieldSet>
-              {gobblers.map(({ id, multiple }, index) => {
-                const alloc = allocations?.find((alloc) => alloc.id === id);
+              <>
+                {gobblers.map(({ id, multiple }, index) => {
+                  const alloc = allocations?.find((alloc) => alloc.id === id);
 
-                return (
-                  <FieldSet key={index}>
-                    <Title>Gobler #{index + 1}</Title>
-                    <Field>
-                      <TextInput value={multiple} onChange={setMultiple(id)} />
-                      <FieldLabel>Multiple</FieldLabel>
-                    </Field>
-                    <Field>
-                      <Value>{alloc?.gooAllocated || "-"}</Value>
-                      <FieldLabel>Goo Allocation</FieldLabel>
-                    </Field>
-                    <Field>
-                      <Value>{alloc?.productionRate || "-"}</Value>
-                      <FieldLabel>ProductionRate</FieldLabel>
-                    </Field>
-                  </FieldSet>
-                );
-              })}
+                  return (
+                    <FieldSet key={index}>
+                      <Title>Gobbler #{index + 1}</Title>
+                      <Field>
+                        <TextInput
+                          value={multiple}
+                          onChange={setMultiple(id)}
+                        />
+                        <FieldLabel>Multiple</FieldLabel>
+                      </Field>
+                      <Field>
+                        <Value>{alloc?.gooAllocated?.toFixed(7) || "-"}</Value>
+                        <FieldLabel>Goo Allocation</FieldLabel>
+                      </Field>
+                      <Field>
+                        <Value>
+                          {alloc?.productionRate?.toFixed(7) || "-"}
+                        </Value>
+                        <FieldLabel>ProductionRate</FieldLabel>
+                      </Field>
+                      <RemoveCircleIcon
+                        onClick={() => {
+                          removeGobbler(id);
+                        }}
+                        size={32}
+                      />
+                    </FieldSet>
+                  );
+                })}
+              </>
+              <Button onClick={addGobbler}>+Add Gobbler</Button>
             </>
           </ToolContainer>
         </ToolSection>
@@ -132,8 +152,20 @@ const Home: NextPage = () => {
 export default Home;
 
 const FieldSet = styled.div`
-  display: flex;
+  display: grid;
   justify: space-between;
+  align-items: center;
+  grid-template-columns: 3fr 3fr 4fr 4fr 1fr;
+`;
+
+const Button = styled.button`
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+`;
+
+const RemoveCircleIcon = styled(RemoveCircle)`
+  padding: 20px;
 `;
 
 const Value = styled.div`
@@ -144,7 +176,9 @@ const Field = styled.div`
   display: flex;
   justify: space-between;
   flex-direction: column;
+  align-items: center;
   padding: 20px;
+  flex-grow: 1;
 `;
 
 const Label = styled.div``;
