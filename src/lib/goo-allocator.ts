@@ -1,25 +1,11 @@
 import { sum } from "lodash";
-import { v4 as guid } from "uuid";
 
-interface Gobbler {
+export interface Gobbler {
   multiple: number;
   id: string;
 }
 
-const goo = 4;
-
-const gobblers: Gobbler[] = [
-  {
-    id: guid(),
-    multiple: 1,
-  },
-  {
-    id: guid(),
-    multiple: 3,
-  },
-];
-
-const optimizeAllocation = (gobblers: Gobbler[], initialGoo: number) => {
+export const allocateGoo = (gobblers: Gobbler[], initialGoo: number) => {
   const sumOfMultiples = sum(gobblers.map(({ multiple }) => multiple));
   const allocations = gobblers.map(({ id, multiple }) => {
     const gooAllocated = (multiple / sumOfMultiples) * initialGoo;
@@ -41,7 +27,3 @@ const optimizeAllocation = (gobblers: Gobbler[], initialGoo: number) => {
     allocations,
   };
 };
-
-const result = optimizeAllocation(gobblers, goo);
-
-console.log({ result });
