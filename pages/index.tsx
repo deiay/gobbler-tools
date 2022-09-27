@@ -4,7 +4,7 @@ import { ChangeEvent, useCallback, useMemo, useState } from "react";
 import styled from "styled-components";
 import { BackGroundGradient } from "../src/components/BackgroundGradient";
 import { allocateGoo, Gobbler } from "../src/lib/goo-allocator";
-import { fill, isNumber, toNumber } from "lodash";
+import { isNumber, toNumber } from "lodash";
 
 const TextInput = ({
   value,
@@ -67,7 +67,7 @@ const Home: NextPage = () => {
     [gobblers]
   );
 
-  const { allocations } = useMemo(() => {
+  const { allocations, totalProductionRate } = useMemo(() => {
     if (!isValid)
       return { allocations: undefined, totalProductionRate: undefined };
     return allocateGoo(gobblers, goo);
@@ -94,6 +94,10 @@ const Home: NextPage = () => {
                     value={goo}
                     onChange={(input) => setGoo(toNumber(input))}
                   />
+                </Field>
+                <Field>
+                  <Value>Total Production Rate</Value>
+                  {totalProductionRate}
                 </Field>
               </FieldSet>
               {gobblers.map(({ id, multiple }, index) => {
