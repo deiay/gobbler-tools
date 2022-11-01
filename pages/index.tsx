@@ -10,14 +10,16 @@ import { RemoveCircle } from "@styled-icons/ionicons-solid";
 const TextInput = ({
   value,
   onChange,
+  type,
 }: {
   value: any;
   onChange: (a: string) => void;
+  type?: string;
 }) => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
   };
-  return <_TextInput value={value} onChange={handleChange} />;
+  return <_TextInput type={type} value={value} onChange={handleChange} />;
 };
 
 const Home: NextPage = () => {
@@ -37,7 +39,7 @@ const Home: NextPage = () => {
   const updateGoo = (input: string) => {
     if (input == "") return setGoo(input);
 
-    if (!isNaN(toNumber(input))) return setGoo(toNumber(input));
+    setGoo(toNumber(input));
   };
 
   const addGobbler = useCallback(() => {
@@ -53,9 +55,7 @@ const Home: NextPage = () => {
   const setMultiple = useCallback(
     (gobblerId: string) => (rawMultiple: string) => {
       const index = gobblers.findIndex((gobbler) => gobbler.id === gobblerId);
-      const multiple = isNaN(toNumber(rawMultiple))
-        ? gobblers[index].multiple
-        : rawMultiple && toNumber(rawMultiple);
+      const multiple = toNumber(rawMultiple);
 
       const newArr = [...gobblers];
       (newArr[index] = {
@@ -99,7 +99,7 @@ const Home: NextPage = () => {
               <FieldSet>
                 <Title>Goo</Title>
                 <Field>
-                  <TextInput value={goo} onChange={updateGoo} />
+                  <TextInput type="number" value={goo} onChange={updateGoo} />
                 </Field>
                 <Field>
                   <Value>Total Production Rate</Value>
@@ -115,6 +115,7 @@ const Home: NextPage = () => {
                       <Title>Gobbler #{index + 1}</Title>
                       <Field>
                         <TextInput
+                          type="number"
                           value={multiple}
                           onChange={setMultiple(id)}
                         />
@@ -190,7 +191,7 @@ const FieldLabel = styled.div`
 
 const _TextInput = styled.input`
   font-size: 18px;
-  width: 60px;
+  width: 100px;
 `;
 
 const ToolSection = styled.div`
