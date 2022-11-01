@@ -7,19 +7,19 @@ import { allocateGoo, Gobbler } from "../src/lib/goo-allocator";
 import { isNumber, toNumber } from "lodash";
 import { RemoveCircle } from "@styled-icons/ionicons-solid";
 
-const TextInput = ({
-  value,
-  onChange,
-  type,
-}: {
+interface TextInputProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> {
   value: any;
   onChange: (a: string) => void;
-  type?: string;
-}) => {
+}
+
+const TextInput = ({ value, onChange, ...textInputProps }: TextInputProps) => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
   };
-  return <_TextInput type={type} value={value} onChange={handleChange} />;
+  return (
+    <_TextInput {...textInputProps} value={value} onChange={handleChange} />
+  );
 };
 
 const Home: NextPage = () => {
@@ -55,7 +55,16 @@ const Home: NextPage = () => {
   const setMultiple = useCallback(
     (gobblerId: string) => (rawMultiple: string) => {
       const index = gobblers.findIndex((gobbler) => gobbler.id === gobblerId);
-      const multiple = toNumber(rawMultiple);
+      const input = toNumber(rawMultiple);
+
+      let multiple;
+      if (input > 9) {
+        multiple = 9;
+      } else if (input < 6) {
+        multiple = 6;
+      } else {
+        multiple = input;
+      }
 
       const newArr = [...gobblers];
       (newArr[index] = {
@@ -116,10 +125,12 @@ const Home: NextPage = () => {
                       <Field>
                         <TextInput
                           type="number"
+                          min={6}
+                          max={9}
                           value={multiple}
                           onChange={setMultiple(id)}
                         />
-                        <FieldLabel>Multiple</FieldLabel>
+                        <FieldLabel>Multiplier</FieldLabel>
                       </Field>
                       <Field>
                         <Value>{alloc?.gooAllocated?.toFixed(7) || "-"}</Value>
